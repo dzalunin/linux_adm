@@ -1,0 +1,88 @@
+{
+  "variables":
+  {
+    "artifact_description": "CentOS Stream 8 with kernel 6.x",
+    "artifact_version": "8",
+    "image_name": "centos-8"
+  },
+
+  "builders":
+  [
+    {
+      "type": "virtualbox-iso",
+      "name": "{{user `image_name`}}",
+      "guest_os_type": "RedHat_64",
+      "vm_name": "packer-centos-vm",
+      
+      "iso_url": "http://mirror.linux-ia64.org/centos/8-stream/isos/x86_64/CentOS-Stream-8-x86_64-20221222-boot.iso",
+      "iso_checksum": "70030af1dff1aed857e9a53311b452d330fa82902b3567f6640f119f9fa29e70",
+      
+      "http_directory": "http",
+      "boot_command":
+      [
+        "<tab> inst.text inst.ks=http://{{ .HTTPIP }}:{{ .HTTPPort }}/ks.cfg<enter><wait>"
+      ],
+      "boot_wait": "10s",
+
+      "output_directory": "builds",
+      "shutdown_command": "sudo -S /sbin/halt -h -p",
+      "shutdown_timeout": "5m",
+            
+      "ssh_username": "vagrant",
+      "ssh_password": "vagrant",
+      "ssh_port": 22,
+      "ssh_pty": true,
+      "ssh_timeout": "180m",
+     
+      "vboxmanage":
+      [
+        ["modifyvm", "{{.Name}}", "--memory", "1024"],
+        ["modifyvm", "{{.Name}}", "--cpus", "2"],
+        ["modifyvm", "{{.Name}}", "--nat-localhostreachable1", "on"]
+      ],
+
+      "disk_size": "10240",
+      "export_opts":
+      [
+        "--manifest",
+        "--vsys",
+        "0",
+        "--description",
+        "{{user `artifact_description`}}",
+        "--version",
+        "{{user `artifact_version`}}"
+      ]
+    }
+  ],
+  
+  "post-processors":
+  [
+    {
+      "type": "vagrant",
+      "compression_level": "7",
+      "output": "centos-{{user `artifact_version`}}-kernel-6-x86_64-Minimal.box"
+     }
+  ],
+
+  "provisioners":
+  [
+    {
+      "type": "shell",
+      "pause_before": "20s",
+      "start_retry_timeout": "1m",
+      "execute_command": "{{.Vars}} sudo -S -E bash '{{.Path}}'",
+      "expect_disconnect": true,
+      "override":
+      {
+        "{{user `image_name`}}":
+        {
+          "scripts":
+          [
+            "scripts/kernel-update.sh",
+            "scripts/clean.sh"
+          ]
+        }
+      }
+    }
+  ]
+}
