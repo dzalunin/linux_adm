@@ -421,3 +421,13 @@ Consistency Policy : resync
        5       8       16        4      active sync   /dev/sdb
 
 ```
+
+# Создание конфига
+
+```sh
+[vagrant@raid-create ~]$ sudo mdadm --detail --scan --verbose | awk '/ARRAY/ {print}'
+ARRAY /dev/md/1 level=raid5 num-devices=5 metadata=1.2 name=raid-create:1 UUID=4389cffe:efefaaae:6260c070:1158d8bd
+
+
+
+```
