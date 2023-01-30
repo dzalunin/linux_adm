@@ -473,5 +473,97 @@ sde                           8:64   0    1G  0 disk
 [root@lvm ~]# pvremove /dev/sdb
   Labels on physical volume "/dev/sdb" successfully wiped.
 [root@lvm ~]# rm -rf /tmp/oldvar
- 
+```
+
+## /home - сделать том для снапшотов, прописать монтирование в fstab.
+
+* Создание тома под home и перенос данных
+```sh
+[root@lvm ~]# pvcreate /dev/sda
+  Physical volume "/dev/sda" successfully created.
+[root@lvm ~]# pvcreate /dev/sdb
+  Physical volume "/dev/sdb" successfully created.
+[root@lvm ~]# vgcreate vg_home /dev/sda /dev/sdb
+  Volume group "vg_home" successfully created
+[root@lvm ~]# lvcreate -n lv_home -L 5G vg_home 
+  Logical volume "lv_home" created.
+[root@lvm ~]# mkfs.ext4 /dev/vg_home/lv_home
+mke2fs 1.42.9 (28-Dec-2013)
+Filesystem label=
+OS type: Linux
+Block size=4096 (log=2)
+Fragment size=4096 (log=2)
+Stride=0 blocks, Stripe width=0 blocks
+327680 inodes, 1310720 blocks
+65536 blocks (5.00%) reserved for the super user
+First data block=0
+Maximum filesystem blocks=1342177280
+40 block groups
+32768 blocks per group, 32768 fragments per group
+8192 inodes per group
+Superblock backups stored on blocks: 
+	32768, 98304, 163840, 229376, 294912, 819200, 884736
+
+Allocating group tables: done                            
+Writing inode tables: done                            
+Creating journal (32768 blocks): done
+Writing superblocks and filesystem accounting information: done 
+[root@lvm ~]# mount /dev/vg_home/lv_home /mnt
+[root@lvm ~]# rsync -avHPSAX /home/ /mnt/
+sending incremental file list
+.......
+sent 1,670 bytes  received 138 bytes  3,616.00 bytes/sec
+total size is 844  speedup is 0.47
+[root@lvm ~]# rm -rf /home/*
+
+```
+
+* Переключение на новый том
+```sh
+[root@lvm ~]# umount /mnt
+[root@lvm ~]# mount /dev/vg_home/lv_home /home
+[root@lvm home]# vgdisplay /dev/vg_home
+[root@lvm home]# lsblk -f /dev/mapper/vg_home-lv_home 
+NAME            FSTYPE LABEL UUID                                 MOUNTPOINT
+vg_home-lv_home ext4         50426258-f6dd-4c0f-b56c-1f1e28065f31 /home
+
+[root@lvm home]# vi /etc/fstab 
+  UUID=50426258-f6dd-4c0f-b56c-1f1e28065f31 /home                   ext4     defaults        0 0
+```
+
+## Снапшоты
+
+* Копируем файл на /home, делаем снапшот
+```sh
+[root@lvm ~]# cp /var/log/messages /home
+[root@lvm ~]# ls /home
+lost+found  messages  vagrant
+[root@lvm ~]# lvcreate -n lv_home_snap -s -L100M /dev/vg_home/lv_home
+  Logical volume "lv_home_snap" created.
+```
+
+* Удаляем файл из /home, монтируем снапшот, смотрим, что файл на месте. Проверяем, как изменился р-р снапшота.
+```sh
+[root@lvm ~]# rm -f /home/messages 
+[root@lvm ~]# ls /home
+lost+found  vagrant
+[root@lvm ~]# mount /dev/vg_home/lv_home_snap /mnt/
+[root@lvm ~]# ls /mnt
+lost+found  messages  vagrant
+[root@lvm ~]# lvs
+  LV           VG         Attr       LSize    Pool Origin  Data%  Meta%  Move Log Cpy%Sync Convert
+  LogVol00     VolGroup00 -wi-ao----    8.00g                                                     
+  LogVol01     VolGroup00 -wi-ao----    1.50g                                                     
+  lv_home      vg_home    owi-aos---    5.00g                                                     
+  lv_home_snap vg_home    swi-aos---  100.00m      lv_home 0.09                                   
+  lv_mirror    vg_var     rwi-aor--- 1016.00m                                     100.00    
+```
+
+* Восстанавливаем из снапшота
+
+```sh
+[root@lvm ~]# lvconvert --merge /dev/vg_home/lv_home_snap
+  Delaying merge since origin is open.
+  Merging of snapshot vg_home/lv_home_snap will occur on next activation of vg_home/lv_home.
+[root@lvm /]# reboot
 ```
