@@ -1,17 +1,19 @@
 # -*- mode: ruby -*-
 # vim: set ft=ruby :
 
+HDPATH = File.join(ENV['HOME'], 'VirtualBox VMs')
+
 Hosts =
 [
   {
-    :name        => "lvm",
+    :name        => "zfs",
     :box         => "centos/7",
-    :box_version => "1804.02",
+    :box_version => "2004.01",
     :ram         => 1024,
     :cpus        => 2,
     :disks       =>
     [
-        {:size => 1024,  :count => 4}
+        {:size => 514,  :count => 8}
     ]    
   }
 ]
@@ -31,6 +33,7 @@ Vagrant.configure("2") do |config|
 
                 vb.customize ["modifyvm", :id, "--audio", "none" ]
                 vb.customize ["modifyvm", :id, "--usb", "off" ]
+                vb.customize ["modifyvm", :id, "--natdnshostresolver1", "on"]
 
                 port = 1
                 host[:disks].each do |disk|
@@ -53,7 +56,11 @@ Vagrant.configure("2") do |config|
             end
 
             config.vm.provision "Shell", type: "shell" do |s|            
-                s.path = "./scripts/init.sh"                 
+                s.path = "./scripts/init.sh"
+            end
+
+            config.vm.provision "Shell", type: "shell" do |s|            
+                s.path = "./scripts/configure.sh"                 
             end         
         end  
     end  
