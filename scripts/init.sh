@@ -16,4 +16,4 @@ yum install -y zfs
 #Add kernel module zfs
 modprobe zfs
 #install wget
-yum install -y wget
+yum install -y wget lsof

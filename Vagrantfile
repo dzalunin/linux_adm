@@ -56,12 +56,8 @@ Vagrant.configure("2") do |config|
             end
 
             config.vm.provision "Shell", type: "shell" do |s|            
-                s.path = "./scripts/init.sh"
-            end
-
-            config.vm.provision "Shell", type: "shell" do |s|            
-                s.path = "./scripts/configure.sh"                 
-            end         
+                s.path = "./scripts/init.sh"                 
+            end    
         end  
     end  
 end
