@@ -1,0 +1,16 @@
+version: "3"
+
+services:
+  nginx:
+    image: hw
+    build: .
+    ports:
+      - 8080:8080
+      - 3000:3000
+    volumes:
+      - nginx_html:/usr/share/nginx/html
+      - nginx_log:/var/log/nginx    
+
+volumes:
+  nginx_html:
+  nginx_log:

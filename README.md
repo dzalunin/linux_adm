@@ -13,7 +13,8 @@ localhost:8080 и localhost:3000
 * files/nginx.conf.tmplt - шаблон конфигурационного файла nginx
 * init.sh - скрипт, ответвтвенный за размещение html  страниц и генерацию конфигурационных файлов nginx
 * src/site*/index.html - страница сайта
-* src/site*/site.ini - настройки публикации сайта, такие как порт или url   
+* src/site*/site.ini - настройки публикации сайта, такие как порт или url
+* docker-compose.yml - конфигурационный файл для запуска контейнера с помощью docker compose   
 
 
 Запуск сборки docker образа:
@@ -79,5 +80,35 @@ root@8-C:~/linux_adm$ tree /var/lib/docker/volumes/
         ├── site1_error.log
         ├── site2_access.log
         └── site2_error.log
+```
+
+Альтернативный запуск с монтированием томов и портов через docker compose
+```sh
+root@8-C:~/linux_adm$ sudo docker compose up -d
+[+] Running 4/4
+ ⠿ Network linux_adm_default      Created  0.3s
+ ⠿ Volume "linux_adm_nginx_html"  Created  0.0s
+ ⠿ Volume "linux_adm_nginx_log"   Created  0.0s
+ ⠿ Container linux_adm-nginx-1    Started 
+
+ root@8-C:~/linux_adm$ tree /var/lib/docker/volumes/
+/var/lib/docker/volumes/
+├── backingFsBlockDev
+├── linux_adm_nginx_html
+│   └── _data
+│       ├── site1
+│       │   └── index.html
+│       └── site2
+│           └── index.html
+├── linux_adm_nginx_log
+│   └── _data
+│       ├── access.log -> /dev/stdout
+│       ├── error.log -> /dev/stderr
+│       ├── site1_access.log
+│       ├── site1_error.log
+│       ├── site2_access.log
+│       └── site2_error.log
+└── metadata.db
+
 ```
 
