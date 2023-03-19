@@ -1,0 +1,11 @@
+server {
+    listen       %port%;
+    listen  [::]:%port%;
+    server_name  %url%;
+    access_log /var/log/nginx/%name%_access.log;
+    error_log /var/log/nginx/%name%_error.log;
+    location / {
+        root    /usr/share/nginx/html/%name%;
+        index   index.html index.htm;
+    }
+}
