@@ -6,7 +6,7 @@ SERVICE_NAME="watchlog"
 
 # Dedug
 # rm -f /etc/sysconfig/watchlog /opt/watchlog.sh /etc/systemd/system/watchlog.timer /etc/systemd/system/watchlog.service
-
+set -ex
 
 function init_config {
     if [ -e $ENV_FILE ]; then
