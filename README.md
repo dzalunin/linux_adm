@@ -121,3 +121,102 @@ Unit /etc/systemd/system/spawn-fcgi.service was created.
 
 Apr 02 11:55:53 sysd systemd[1]: Started spawn-fcgi startup service.
 ```
+
+## Дополнить unit-файл apache httpd возможности запустить несколько инстансов сервера с разными конфигами.
+
+Скрипт: [hw2.sh](./scripts/hw2.sh)
+
+Результат выполнения:
+```
+[vagrant@sysd linux_adm]$ sudo ./hw2.sh 
++ HTTPD_ENV_DIR=/etc/sysconfig
++ HTTPD_CONFIG_DIR=/etc/httpd/conf
++ HTTPD_UNIT=/usr/lib/systemd/system/httpd.service
++ REQUIREMENTS=httpd
++ setenforce 0
++ stop_httpd
+++ systemctl is-active httpd.service
++ base_instance_status=active
++ '[' active == active ']'
++ systemctl stop httpd.service
++ systemctl disable httpd.service
++ add_httpd_config_template
++ '[' -e /usr/lib/systemd/system/httpd.service.bak ']'
+++ dirname /usr/lib/systemd/system/httpd.service
++ template_unit=/usr/lib/systemd/system/httpd@.service
++ cp /usr/lib/systemd/system/httpd.service /usr/lib/systemd/system/httpd.service.bak
++ mv /usr/lib/systemd/system/httpd.service /usr/lib/systemd/system/httpd@.service
++ sed -i -e ' /EnvironmentFile/ s/$/-%i/g' /usr/lib/systemd/system/httpd@.service
++ systemctl daemon-reload
++ create_httpd_instance first 8080
++ instance_name=first
++ instance_port=8080
++ instance_config=first.conf
++ env_file=/etc/sysconfig/httpd-first
++ '[' -e /etc/sysconfig/httpd-first ']'
++ echo 'OPTIONS=-f conf/first.conf'
++ echo 'Enviroment file /etc/sysconfig/httpd-first was created.'
+Enviroment file /etc/sysconfig/httpd-first was created.
++ cat /etc/httpd/conf/httpd.conf
++ sed -e '/^ *#.*$/d' -e '/^$/d' -e '/ServerRoot/a PidFile "/var/run/httpd-first.pid"' -e 's/Listen [0-9]*/Listen 8080/g'
++ echo 'Httpd config file /etc/httpd/conf/first.conf was created.'
+Httpd config file /etc/httpd/conf/first.conf was created.
++ systemctl start httpd@first.service
++ systemctl status httpd@first.service
+● httpd@first.service - The Apache HTTP Server
+   Loaded: loaded (/usr/lib/systemd/system/httpd@.service; disabled; vendor preset: disabled)
+   Active: active (running) since Tue 2023-04-04 20:38:34 UTC; 6ms ago
+     Docs: man:httpd(8)
+           man:apachectl(8)
+ Main PID: 3547 (httpd)
+   Status: "Processing requests..."
+   CGroup: /system.slice/system-httpd.slice/httpd@first.service
+           ├─3547 /usr/sbin/httpd -f conf/first.conf -DFOREGROUND
+           ├─3548 /usr/sbin/httpd -f conf/first.conf -DFOREGROUND
+           ├─3549 /usr/sbin/httpd -f conf/first.conf -DFOREGROUND
+           ├─3550 /usr/sbin/httpd -f conf/first.conf -DFOREGROUND
+           ├─3551 /usr/sbin/httpd -f conf/first.conf -DFOREGROUND
+           ├─3552 /usr/sbin/httpd -f conf/first.conf -DFOREGROUND
+           └─3553 /usr/sbin/httpd -f conf/first.conf -DFOREGROUND
+
+Apr 04 20:38:34 sysd systemd[1]: Starting The Apache HTTP Server...
+Apr 04 20:38:34 sysd httpd[3547]: AH00558: httpd: Could not reliably determine the server's fully qualified domain name, using 127.0.1.1. Set the 'ServerName...his message
+Apr 04 20:38:34 sysd systemd[1]: Started The Apache HTTP Server.
+Hint: Some lines were ellipsized, use -l to show in full.
++ create_httpd_instance second 9090
++ instance_name=second
++ instance_port=9090
++ instance_config=second.conf
++ env_file=/etc/sysconfig/httpd-second
++ '[' -e /etc/sysconfig/httpd-second ']'
++ echo 'OPTIONS=-f conf/second.conf'
++ echo 'Enviroment file /etc/sysconfig/httpd-second was created.'
+Enviroment file /etc/sysconfig/httpd-second was created.
++ cat /etc/httpd/conf/httpd.conf
++ sed -e '/^ *#.*$/d' -e '/^$/d' -e '/ServerRoot/a PidFile "/var/run/httpd-second.pid"' -e 's/Listen [0-9]*/Listen 9090/g'
++ echo 'Httpd config file /etc/httpd/conf/second.conf was created.'
+Httpd config file /etc/httpd/conf/second.conf was created.
++ systemctl start httpd@second.service
++ systemctl status httpd@second.service
+● httpd@second.service - The Apache HTTP Server
+   Loaded: loaded (/usr/lib/systemd/system/httpd@.service; disabled; vendor preset: disabled)
+   Active: active (running) since Tue 2023-04-04 20:38:34 UTC; 7ms ago
+     Docs: man:httpd(8)
+           man:apachectl(8)
+ Main PID: 3563 (httpd)
+   Status: "Processing requests..."
+   CGroup: /system.slice/system-httpd.slice/httpd@second.service
+           ├─3563 /usr/sbin/httpd -f conf/second.conf -DFOREGROUND
+           ├─3564 /usr/sbin/httpd -f conf/second.conf -DFOREGROUND
+           ├─3565 /usr/sbin/httpd -f conf/second.conf -DFOREGROUND
+           ├─3566 /usr/sbin/httpd -f conf/second.conf -DFOREGROUND
+           ├─3567 /usr/sbin/httpd -f conf/second.conf -DFOREGROUND
+           ├─3568 /usr/sbin/httpd -f conf/second.conf -DFOREGROUND
+           └─3569 /usr/sbin/httpd -f conf/second.conf -DFOREGROUND
+
+Apr 04 20:38:34 sysd systemd[1]: Starting The Apache HTTP Server...
+Apr 04 20:38:34 sysd httpd[3563]: AH00558: httpd: Could not reliably determine the server's fully qualified domain name, using 127.0.1.1. Set the 'ServerName...his message
+Apr 04 20:38:34 sysd systemd[1]: Started The Apache HTTP Server.
+Hint: Some lines were ellipsized, use -l to show in full.
+[vagrant@sysd linux_adm]$ 
+```
