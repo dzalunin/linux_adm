@@ -1,0 +1,16 @@
+---
+
+- hosts: ns01
+  become: yes
+  roles:
+  - bind-master
+
+- hosts: ns02
+  become: yes
+  roles:
+  - bind-slave
+     
+- hosts: client1, client2
+  become: yes
+  roles:
+  - bind-client

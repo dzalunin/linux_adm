@@ -1,0 +1,38 @@
+---
+
+- name: Install client packages
+  ansible.builtin.yum:
+    name:
+    - bind-utils
+    state: present
+    update_cache: true
+
+- name: Start chronyd
+  ansible.builtin.service: 
+    name: chronyd
+    state: restarted
+    enabled: true
+    
+- name: Copy resolv.conf to the client
+  ansible.builtin.template:
+    src: resolv.conf.j2
+    dest: /etc/resolv.conf
+    owner: root
+    group: root
+    mode: 0644
+
+- name: Copy rndc conf file
+  ansible.builtin.template:
+    src: rndc.conf.j2
+    dest: /home/vagrant/rndc.conf
+    owner: vagrant
+    group: vagrant
+    mode: 0644
+
+- name: Copy motd to the client
+  ansible.builtin.template:
+    src: client-motd.j2
+    dest: /etc/motd
+    owner: root
+    group: root
+    mode: 0644

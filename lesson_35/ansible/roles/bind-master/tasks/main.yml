@@ -1,0 +1,52 @@
+---
+
+- name: Common tasks for bind server
+  ansible.builtin.include_role:
+    name: bind-common
+
+- name: Create named.conf
+  ansible.builtin.template:
+    src: named.conf.j2
+    dest: /etc/named.conf
+    owner: root
+    group: named
+    mode: 0640
+
+- name: Create zone dns.lab
+  ansible.builtin.template:
+    src: named.dns.lab.j2
+    dest: /etc/named/named.dns.lab
+    owner: root
+    group: named
+    mode: 0660
+
+- name: Create zone dns.lab reverse
+  ansible.builtin.template:
+    src: named.dns.lab.rev.j2
+    dest: /etc/named/named.dns.lab.rev
+    owner: root
+    group: named
+    mode: 0660
+
+- name: Create zone newdns.lab
+  ansible.builtin.template:
+    src: named.newdns.lab.j2
+    dest: /etc/named/named.newdns.lab
+    owner: root
+    group: named
+    mode: 0660       
+
+- name: Create zone dns.lab.client
+  ansible.builtin.template:
+    src: named.dns.lab.client.j2
+    dest: /etc/named/named.dns.lab.client
+    owner: root
+    group: named
+    mode: 0660
+
+- name: Ensure named is running and enabled
+  ansible.builtin.service:
+    name: named
+    state: restarted
+    enabled: yes    
+
