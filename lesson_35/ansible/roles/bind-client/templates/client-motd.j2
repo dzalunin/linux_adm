@@ -1,0 +1,17 @@
+### Welcome to the DNS lab! ###
+
+- Use this client to test the enviroment, with dig or nslookup.
+    dig @{{ master_dns }} ns01.dns.lab
+    dig @{{ slave_dns }} -x {{ master_dns }}
+
+- nsupdate is available in the ddns.lab zone. Ex:
+    nsupdate -k /etc/named.zonetransfer.key
+    server {{ master_dns }}
+    zone ddns.lab 
+    update add www.ddns.lab. 60 A {{ ip_addr }}
+    send
+
+- rndc is also available to manage the servers
+    rndc -c ~/rndc.conf reload
+
+Enjoy!

@@ -1,0 +1,6 @@
+key "rndc-key" {{ rndc_key }};
+
+options {
+    default-key "rndc-key";
+    default-server {{ master_dns }}; 
+};

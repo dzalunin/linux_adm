@@ -1,0 +1,20 @@
+$TTL 3600
+$ORIGIN dns.lab.
+@               IN      SOA     {{ master_dns_name }}.dns.lab. root.dns.lab. (
+                            2711201407 ; serial
+                            3600       ; refresh (1 hour)
+                            600        ; retry (10 minutes)
+                            86400      ; expire (1 day)
+                            600        ; minimum (10 minutes)
+                        )
+
+                IN      NS      {{ master_dns_name }}.dns.lab.
+                IN      NS      {{ slave_dns_name }}.dns.lab.
+
+; DNS Servers
+{{ master_dns_name }}            IN      A       {{ master_dns }}
+{{ slave_dns_name }}             IN      A       {{ slave_dns }}
+
+;Web
+{{ client1_dns_name }}            IN      A       {{ client1 }}
+{{ client2_dns_name }}            IN      A       {{ client2 }}
